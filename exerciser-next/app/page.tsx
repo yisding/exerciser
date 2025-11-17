@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ClassList } from '../components/ClassList';
+import { Filters } from '../components/Filters';
 
 interface Studio {
   id: string;
@@ -29,26 +30,41 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter states
+  const [selectedBrand, setSelectedBrand] = useState('');
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     fetchClasses();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBrand, selectedDate]);
 
   const fetchClasses = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get today's date and the next 7 days
-      const startDate = new Date();
+      // Build query parameters
+      const params = new URLSearchParams();
+
+      // Set date range for selected date
+      const startDate = new Date(selectedDate);
       startDate.setHours(0, 0, 0, 0);
 
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 7);
+      const endDate = new Date(selectedDate);
       endDate.setHours(23, 59, 59, 999);
 
-      const response = await fetch(
-        `/api/classes?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
-      );
+      params.append('startDate', startDate.toISOString());
+      params.append('endDate', endDate.toISOString());
+
+      if (selectedBrand) {
+        params.append('brand', selectedBrand);
+      }
+
+      const response = await fetch(`/api/classes?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch classes');
@@ -64,10 +80,22 @@ export default function Home() {
     }
   };
 
+  // Client-side search filtering
+  const filteredClasses = classes.filter((fitnessClass) => {
+    if (!searchQuery) return true;
+
+    const query = searchQuery.toLowerCase();
+    return (
+      fitnessClass.className.toLowerCase().includes(query) ||
+      fitnessClass.instructor.toLowerCase().includes(query) ||
+      fitnessClass.studio.name.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <h1 className="text-2xl font-bold text-gray-900">Exerciser</h1>
           <p className="text-sm text-gray-600 mt-1">
             Find fitness classes across the Bay Area
@@ -75,7 +103,16 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <Filters
+          selectedBrand={selectedBrand}
+          onBrandChange={setSelectedBrand}
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
             <div className="flex">
@@ -102,7 +139,7 @@ export default function Home() {
           </div>
         )}
 
-        <ClassList classes={classes} loading={loading} />
+        <ClassList classes={filteredClasses} loading={loading} />
       </main>
     </div>
   );
