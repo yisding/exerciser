@@ -1,0 +1,24 @@
+{
+  "name": "exerciser-scraper-service",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "scrape:test": "ts-node src/test-integration.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.1.0",
+    "axios": "^1.7.9",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/node-cron": "^3.0.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}

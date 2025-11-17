@@ -155,9 +155,10 @@ interface UserPreferences {
 
 ## Project Status
 
-**Current Phase**: Phase 1 - Foundation
+**Current Phase**: Phase 2 - First Integration
 **Started**: 2025-11-16
-**Progress**: 0% (0/13 studios integrated)
+**Updated**: 2025-11-17
+**Progress**: Phase 1 Complete! 0/13 studios integrated (Phase 2 next)
 
 ### How to Track Progress
 - Tasks are marked with `[ ]` when incomplete and `[x]` when complete
@@ -173,36 +174,36 @@ interface UserPreferences {
 **Goal**: Establish core infrastructure, scraping framework, and basic UI
 
 #### 1.1 Project Structure Setup
-- [ ] Create `scraper-service/` folder for scraper code
-- [ ] Create `shared/` folder for shared types and utilities
-- [ ] Set up separate `package.json` for scraper service
-- [ ] Configure TypeScript for both services
+- [x] Create `scraper-service/` folder for scraper code
+- [x] Create `shared/` folder for shared types and utilities
+- [x] Set up separate `package.json` for scraper service
+- [x] Configure TypeScript for both services
 
 #### 1.2 Database Setup
-- [ ] Install PostgreSQL locally:
+- [x] Install PostgreSQL locally:
   - macOS: `brew install postgresql@15` or use Postgres.app
   - Linux: `sudo apt-get install postgresql`
   - Windows: Download from postgresql.org
-- [ ] Start PostgreSQL service locally
-- [ ] Create a database: `createdb exerciser`
-- [ ] Install Prisma in `shared/`: `npm install prisma @prisma/client`
-- [ ] Define database schema in `shared/prisma/schema.prisma`:
+- [x] Start PostgreSQL service locally
+- [x] Create a database: `createdb exerciser`
+- [x] Install Prisma in `shared/`: `npm install prisma @prisma/client`
+- [x] Define database schema in `shared/prisma/schema.prisma`:
   - Studios table
   - Classes table
   - ScrapeLog table (track success/failures)
-- [ ] Run initial migration: `npx prisma migrate dev`
-- [ ] Test database connection from both Next.js app and scraper service
+- [x] Run initial migration: `npx prisma migrate dev`
+- [x] Test database connection from both Next.js app and scraper service
 
 #### 1.3 Integration Service Setup
-- [ ] Navigate to `scraper-service/` (rename to `integration-service/` if preferred) and install dependencies:
+- [x] Navigate to `scraper-service/` (rename to `integration-service/` if preferred) and install dependencies:
   ```bash
   cd scraper-service
   npm install axios node-cron @prisma/client typescript ts-node @types/node
   ```
-- [ ] Create base integration class with common utilities
-- [ ] Set up HTTP client configuration (axios with retries)
-- [ ] Set up environment variables (.env) for DB connection
-- [ ] Create simple test integration to verify setup
+- [x] Create base integration class with common utilities
+- [x] Set up HTTP client configuration (axios with retries)
+- [x] Set up environment variables (.env) for DB connection
+- [x] Create simple test integration to verify setup
 
 **Note**: Only install Playwright later if needed for studios without APIs:
 ```bash
@@ -211,25 +212,31 @@ npx playwright install chromium
 ```
 
 #### 1.4 Next.js App Setup
-- [ ] Design mobile-first component structure:
+- [x] Design mobile-first component structure:
   - ClassCard component
   - StudioFilter component
   - DatePicker component
   - LoadingState & ErrorState components
-- [ ] Create API routes (read-only):
+- [x] Create API routes (read-only):
   - GET /api/classes
   - GET /api/studios
-- [ ] Build UI with mock data for testing
-- [ ] Set up Prisma client for database queries
+- [x] Build UI with mock data for testing
+- [x] Set up Prisma client for database queries
 
-**Deliverable**: Separate scraper service + Next.js app, both connected to database
+**Deliverable**: Separate scraper service + Next.js app, both connected to database ✅
 
-**Learnings**: (Add notes here as you complete this phase)
-<!-- Example:
-- Found that PostgreSQL works better with connection pooling enabled
-- Prisma migrations need to be run in shared/ directory
-- Added dotenv package for environment variable management
--->
+**Learnings**:
+- PostgreSQL SSL configuration required disabling SSL for local development
+- Authentication method changed from 'peer' to 'trust' for local postgres user
+- Prisma client needs to be generated in both `shared/` and `exerciser-next/` directories
+- Symlinked `shared/prisma` to `exerciser-next/prisma` for schema sharing
+- Removed Google Fonts (Geist) due to network/TLS issues in build environment
+- Abstract properties in TypeScript classes can't be accessed in constructor - used lazy getter pattern for logger
+- Next.js App Router requires proper environment variable handling with `.env.local`
+- Database connection string format: `postgresql://postgres:postgres@localhost:5432/exerciser`
+- Created comprehensive utility classes: Logger, HttpClient, date-parser utilities
+- Implemented BaseIntegration abstract class with retry logic and error handling
+- Test integration successfully verified end-to-end flow from database to UI
 
 ---
 

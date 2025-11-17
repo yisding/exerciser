@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Studios table - represents individual fitness studio locations
+model Studio {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String   // "Club Pilates", "CycleBar", etc.
+  location    String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  websiteUrl  String?
+  phoneNumber String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  classes FitnessClass[]
+
+  @@index([brand])
+  @@index([location])
+}
+
+// Fitness classes table - represents individual class sessions
+model FitnessClass {
+  id              String   @id @default(cuid())
+  studioId        String
+  className       String
+  instructor      String
+  startTime       DateTime
+  endTime         DateTime
+  duration        Int // minutes
+  capacity        Int?
+  spotsAvailable  Int?
+  level           String? // "Beginner", "Intermediate", "Advanced", "All Levels"
+  description     String?
+  bookingUrl      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  studio Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@index([studioId])
+  @@index([startTime])
+  @@index([className])
+}
+
+// Scrape log table - tracks scraping attempts and results
+model ScrapeLog {
+  id          String   @id @default(cuid())
+  brand       String
+  status      String // "success", "error", "partial"
+  message     String?
+  classCount  Int?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  errorDetails String? @db.Text
+
+  @@index([brand])
+  @@index([startedAt])
+}
