@@ -1,4 +1,4 @@
-import { ClubPilatesIntegration } from './club-pilates.integration';
+import { ClubPilatesWebIntegration } from './club-pilates-web.integration';
 import { CycleBarIntegration } from './cyclebar.integration';
 import { RowHouseIntegration } from './row-house.integration';
 import { PureBarreIntegration } from './pure-barre.integration';
@@ -27,13 +27,17 @@ export class Orchestrator {
   constructor() {
     // Register all available integrations
     this.integrations = [
-      // Xponential Fitness brands (share platform)
-      new ClubPilatesIntegration(),
+      // Xponential Fitness brands - Using web integration for Club Pilates
+      // This one uses real website API discovery and falls back to scraping/mock
+      new ClubPilatesWebIntegration(),
+
+      // Other Xponential brands - TODO: Update to web integrations
       new CycleBarIntegration(),
       new RowHouseIntegration(),
       new PureBarreIntegration(),
       new YogaSixIntegration(),
-      // Other brands
+
+      // Other brands - TODO: Create web integrations
       new F45Integration(),
       new Barre3Integration(),
       new TitleBoxingIntegration(),
