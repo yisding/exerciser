@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { ClassList } from '../components/ClassList';
 import { Filters } from '../components/Filters';
+import { ClassDetailsModal } from '../components/ClassDetailsModal';
 
 interface Studio {
   id: string;
   name: string;
   brand: string;
   location: string;
+  address?: string;
 }
 
 interface FitnessClass {
@@ -36,6 +38,27 @@ export default function Home() {
     new Date().toISOString().split('T')[0]
   );
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedTimeRange, setSelectedTimeRange] = useState('');
+
+  // Modal and favorites state
+  const [selectedClass, setSelectedClass] = useState<FitnessClass | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('exerciser_favorites');
+    if (savedFavorites) {
+      setFavorites(new Set(JSON.parse(savedFavorites)));
+    }
+  }, []);
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('exerciser_favorites', JSON.stringify(Array.from(favorites)));
+  }, [favorites]);
 
   useEffect(() => {
     fetchClasses();
@@ -80,17 +103,89 @@ export default function Home() {
     }
   };
 
-  // Client-side search filtering
-  const filteredClasses = classes.filter((fitnessClass) => {
-    if (!searchQuery) return true;
+  // Helper function to check if class time falls within selected time range
+  const matchesTimeRange = (classStartTime: string, timeRange: string): boolean => {
+    if (!timeRange) return true;
 
-    const query = searchQuery.toLowerCase();
-    return (
-      fitnessClass.className.toLowerCase().includes(query) ||
-      fitnessClass.instructor.toLowerCase().includes(query) ||
-      fitnessClass.studio.name.toLowerCase().includes(query)
-    );
+    const startDate = new Date(classStartTime);
+    const hour = startDate.getHours();
+
+    switch (timeRange) {
+      case 'early-morning':
+        return hour >= 5 && hour < 8;
+      case 'morning':
+        return hour >= 8 && hour < 12;
+      case 'afternoon':
+        return hour >= 12 && hour < 17;
+      case 'evening':
+        return hour >= 17 && hour < 21;
+      default:
+        return true;
+    }
+  };
+
+  // Client-side filtering
+  const filteredClasses = classes.filter((fitnessClass) => {
+    // Search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        fitnessClass.className.toLowerCase().includes(query) ||
+        fitnessClass.instructor.toLowerCase().includes(query) ||
+        fitnessClass.studio.name.toLowerCase().includes(query);
+
+      if (!matchesSearch) return false;
+    }
+
+    // Level filter
+    if (selectedLevel && fitnessClass.level !== selectedLevel) {
+      return false;
+    }
+
+    // Location filter
+    if (selectedLocation && fitnessClass.studio.location !== selectedLocation) {
+      return false;
+    }
+
+    // Time range filter
+    if (!matchesTimeRange(fitnessClass.startTime, selectedTimeRange)) {
+      return false;
+    }
+
+    return true;
   });
+
+  const handleClassClick = (fitnessClass: FitnessClass) => {
+    setSelectedClass(fitnessClass);
+    setIsModalOpen(true);
+  };
+
+  const handleToggleFavorite = (classId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavorites((prev) => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(classId)) {
+        newFavorites.delete(classId);
+      } else {
+        newFavorites.add(classId);
+      }
+      return newFavorites;
+    });
+  };
+
+  const handleModalToggleFavorite = () => {
+    if (selectedClass) {
+      setFavorites((prev) => {
+        const newFavorites = new Set(prev);
+        if (newFavorites.has(selectedClass.id)) {
+          newFavorites.delete(selectedClass.id);
+        } else {
+          newFavorites.add(selectedClass.id);
+        }
+        return newFavorites;
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -111,6 +206,12 @@ export default function Home() {
           onDateChange={setSelectedDate}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          selectedLevel={selectedLevel}
+          onLevelChange={setSelectedLevel}
+          selectedLocation={selectedLocation}
+          onLocationChange={setSelectedLocation}
+          selectedTimeRange={selectedTimeRange}
+          onTimeRangeChange={setSelectedTimeRange}
         />
 
         {error && (
@@ -139,8 +240,22 @@ export default function Home() {
           </div>
         )}
 
-        <ClassList classes={filteredClasses} loading={loading} />
+        <ClassList
+          classes={filteredClasses}
+          loading={loading}
+          onClassClick={handleClassClick}
+          favorites={favorites}
+          onToggleFavorite={handleToggleFavorite}
+        />
       </main>
+
+      <ClassDetailsModal
+        fitnessClass={selectedClass}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        isFavorite={selectedClass ? favorites.has(selectedClass.id) : false}
+        onToggleFavorite={handleModalToggleFavorite}
+      />
     </div>
   );
 }

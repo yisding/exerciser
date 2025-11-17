@@ -26,9 +26,12 @@ interface FitnessClass {
 interface ClassListProps {
   classes: FitnessClass[];
   loading?: boolean;
+  onClassClick?: (fitnessClass: FitnessClass) => void;
+  favorites?: Set<string>;
+  onToggleFavorite?: (classId: string, e: React.MouseEvent) => void;
 }
 
-export function ClassList({ classes, loading }: ClassListProps) {
+export function ClassList({ classes, loading, onClassClick, favorites = new Set(), onToggleFavorite }: ClassListProps) {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -80,6 +83,9 @@ export function ClassList({ classes, loading }: ClassListProps) {
           capacity={fitnessClass.capacity}
           level={fitnessClass.level}
           bookingUrl={fitnessClass.bookingUrl}
+          onClick={() => onClassClick?.(fitnessClass)}
+          isFavorite={favorites.has(fitnessClass.id)}
+          onToggleFavorite={(e) => onToggleFavorite?.(fitnessClass.id, e)}
         />
       ))}
     </div>
