@@ -14,10 +14,10 @@
     "seed": "ts-node src/seed-studios.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.1.0",
+    "@prisma/client": "^6.19.0",
     "axios": "^1.7.9",
-    "node-cron": "^3.0.3",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

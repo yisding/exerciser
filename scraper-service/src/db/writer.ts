@@ -1,6 +1,7 @@
 import { prisma } from './client';
 import { ScrapeResult } from '../../../shared/types';
 import { Logger } from '../../../shared/utils/logger';
+import { Prisma } from '@prisma/client';
 
 const logger = new Logger('DBWriter');
 
@@ -12,7 +13,7 @@ export async function writeScrapeResults(result: ScrapeResult): Promise<void> {
 
   try {
     // Start a transaction
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Delete old classes for this brand (classes older than 1 day)
       const oneDayAgo = new Date();
       oneDayAgo.setDate(oneDayAgo.getDate() - 1);

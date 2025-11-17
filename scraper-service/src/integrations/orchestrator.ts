@@ -1,5 +1,16 @@
 import { ClubPilatesIntegration } from './club-pilates.integration';
 import { CycleBarIntegration } from './cyclebar.integration';
+import { RowHouseIntegration } from './row-house.integration';
+import { PureBarreIntegration } from './pure-barre.integration';
+import { YogaSixIntegration } from './yogasix.integration';
+import { F45Integration } from './f45.integration';
+import { Barre3Integration } from './barre3.integration';
+import { TitleBoxingIntegration } from './title-boxing.integration';
+import { StretchLabIntegration } from './stretchlab.integration';
+import { SpengaIntegration } from './spenga.integration';
+import { RumbleIntegration } from './rumble.integration';
+import { JiaRenYogaIntegration } from './jia-ren-yoga.integration';
+import { SolidcoreIntegration } from './solidcore.integration';
 import { writeScrapeResults } from '../db/writer';
 import { Logger } from '../../../shared/utils/logger';
 import { BaseIntegration } from './base.integration';
@@ -16,9 +27,21 @@ export class Orchestrator {
   constructor() {
     // Register all available integrations
     this.integrations = [
+      // Xponential Fitness brands (share platform)
       new ClubPilatesIntegration(),
       new CycleBarIntegration(),
-      // Add more integrations here as they're implemented
+      new RowHouseIntegration(),
+      new PureBarreIntegration(),
+      new YogaSixIntegration(),
+      // Other brands
+      new F45Integration(),
+      new Barre3Integration(),
+      new TitleBoxingIntegration(),
+      new StretchLabIntegration(),
+      new SpengaIntegration(),
+      new RumbleIntegration(),
+      new JiaRenYogaIntegration(),
+      new SolidcoreIntegration(),
     ];
   }
 
